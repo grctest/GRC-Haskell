@@ -71,7 +71,7 @@ scrapeCPIDTable = chroots ("td" @: ["style" @= "text-align: center"]) scrapeCPID
 
 -- | Final section of the Scalpel functional
 -- Called from the 'scrapeCPIDTable' function, handed each <td> element.
--- Each <td> element has the hyperlink "a" text extracted (the CPID).
+-- Each <td> element has the hyperlink "a" text extracted (the Block Number).
 scrapeCPID :: Scraper String [BlockNumber]
 scrapeCPID = do
     cpid <- text $ "a"
