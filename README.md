@@ -2,8 +2,6 @@
 
 ---
 
-## Required packages:
-
 ## How to use:
 
 Step 1: Install haskell-platform (on linux)
