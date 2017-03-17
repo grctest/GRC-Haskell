@@ -1,4 +1,4 @@
--- | Required for use with Cabal, but perhaps only when scraping large chunks of HTML?
+-- | Required for use with Scalpel, but perhaps only when scraping large chunks of HTML?
 {-# LANGUAGE OverloadedStrings #-}
 
 -- | Importing required packages
