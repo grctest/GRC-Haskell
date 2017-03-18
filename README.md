@@ -12,12 +12,12 @@ Step 3: Terminal -> Navigate to cloned repo folder
 
 Step 4: Cabal update
 
-Step 5: Cabal install scalpel
+Step 5: Cabal install requiredPackages
 
 Step 6: Cabal repl
 
-Step 7: :load cpid.hs
+Step 7: :load scriptName.hs
 
-Step 8: main (input cpid and number of sequential blocks to detect)
+Step 8: main 
 
-main --> cpid input -> block number input --> List of sequential block lists.
+Step 9: follow script prompts
