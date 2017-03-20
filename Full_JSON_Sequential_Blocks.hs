@@ -26,42 +26,47 @@ counterInit = 0
 
 -- | Configuring Aeson to handle the blocks.json fields
 -- TXID has been missed skipped to simplify the script.
-data GetBlockByNumber = GetBlockByNumber { hash :: String
-                                         , confirmations :: Integer
-                                         , size :: Integer
-                                         , height :: Integer
-                                         , version :: Integer
-                                         , merkleroot :: String
-                                         , mint :: Float
-                                         , time :: Integer
-                                         , nonce :: Integer
-                                         , bits :: String
-                                         , difficulty :: Float
-                                         , blocktrust :: String
-                                         , chaintrust :: String
-                                         , previousblockhash :: String
-                                         , nextblockhash :: String
-                                         , flags :: String
-                                         , proofhash :: String
-                                         , entropybit :: Integer
-                                         , modifier :: String
-                                         , modifierchecksum :: String
+data GetBlockByNumber = GetBlockByNumber { height :: Integer
                                          , cpid :: String -- The json file at this point has uppercase variables, may be an issue?
-                                         , magnitude :: Float
-                                         , lastpaymenttime :: String
-                                         , researchsubsidy :: Float
-                                         , researchage :: Float
-                                         , researchmagnitudeunit :: Float
-                                         , researchaveragemagnitude :: Float
-                                         , lastporblockhash :: String
-                                         , interest :: Float
                                          , grcaddress :: String
-                                         , clientversion :: String
-                                         , cpidvalid :: Bool
-                                         , neuralhash :: String
-                                         , issuperblock :: Integer
-                                         , iscontract :: Integer
                                          } deriving (Show, Generic, Eq)
+
+--data GetBlockByNumber = GetBlockByNumber { hash :: String
+--                                         , confirmations :: Integer
+--                                         , size :: Integer
+--                                         , height :: Integer
+--                                         , version :: Integer
+--                                         , merkleroot :: String
+--                                         , mint :: Float
+--                                         , time :: Integer
+--                                         , nonce :: Integer
+--                                         , bits :: String
+--                                         , difficulty :: Float
+--                                         , blocktrust :: String
+--                                         , chaintrust :: String
+--                                         , previousblockhash :: String
+--                                         , nextblockhash :: String
+--                                         , flags :: String
+--                                         , proofhash :: String
+--                                         , entropybit :: Integer
+--                                         , modifier :: String
+--                                         , modifierchecksum :: String
+--                                         , cpid :: String -- The json file at this point has uppercase variables, may be an issue?
+--                                         , magnitude :: Float
+--                                         , lastpaymenttime :: String
+--                                         , researchsubsidy :: Float
+--                                         , researchage :: Float
+--                                         , researchmagnitudeunit :: Float
+--                                         , researchaveragemagnitude :: Float
+--                                         , lastporblockhash :: String
+--                                         , interest :: Float
+--                                         , grcaddress :: String
+--                                         , clientversion :: String
+--                                         , cpidvalid :: Bool
+--                                         , neuralhash :: String
+--                                         , issuperblock :: Integer
+--                                         , iscontract :: Integer
+--                                         } deriving (Show, Generic, Eq)
 
 -- | This configures Aeson to handle the json fields properly (json has uppercase keys, this changes keys to lower case.)
 instance FromJSON GetBlockByNumber where
@@ -78,7 +83,7 @@ jsonLower x = x
 -- | Specify the filename of the JSON file we want to import
 -- Could make this an user input later
 jsonFile :: Prelude.FilePath
-jsonFile = "json/blocks.json"
+jsonFile = "json/blocksMin.json"
 
 -- | Loading the specified JSON file into memory
 -- Bear in mind that the fully dumped blockchain is approx 1.6GB!
@@ -207,26 +212,31 @@ quantitySequentialBlocks (x:xs) counter = do
 
 -- | At this point we've got a large list of sequential blocks, but who cares about two blocks in a row? We want the user to be able to check for 6+ blocks in a row, etc.
 -- We pass in the list of sequential lists, and return a list of sequential lists (minus lists with a smaller length than user input)
---filterSequencesOnUserInput :: MinimumSequentialBlocks -> [[BlockNumber]] -> [[BlockNumber]]
---filterSequencesOnUserInput userInput [] = []
---filterSequencesOnUserInput userInput (x:xs) = do
+filterSequencesOnUserInput :: MinimumSequentialBlocks -> [[(BlockNumber, CPIDandAddress)]] -> [[(BlockNumber, CPIDandAddress)]]
+filterSequencesOnUserInput userInput [] = []
+filterSequencesOnUserInput userInput (x:xs) = do
     -- | Check if the length of the list is equal to or greater than the userInput quantity.
---    if ((length x) >= userInput)
---        then do
+    if ((length x) >= userInput)
+        then do
             -- | If equal or greater, we return the list and recursively call the "filterSequencesOnUserInput" to continuously check the rest of the list of lists.
---            [x] ++ filterSequencesOnUserInput userInput xs
---        else do
+            [x] ++ filterSequencesOnUserInput userInput xs
+        else do
             -- | If less than the user input, we skip the list (ommiting from the output) and recursively call the "filterSequencesOnUserInput" function.
---            filterSequencesOnUserInput userInput xs
+            filterSequencesOnUserInput userInput xs
 
 
 -- | Main function that is called from prelude!
 -- There is currently no user input other than preparing the blocks.json file within the json folder.
 -- TODO: Reintroduce 'filterSequencesOnUserInput', enabling users to focus on a specific lengths of sequentially staked blocks.
+main :: IO ()
 main = do
+    -- | Prompt the user for the quantity of sequentially staked blocks required to be shown.
+    -- TODO: Prevent 0 and negatives?
+    foo2 <- putStrLn "How many blocks in a row do you want to find?"
+    userBlockQuery <- getLine
     d <- eitherDecode <$> getJSON :: IO (Either String [GetBlockByNumber])
     case d of
         -- | If there is an error, print the error and quit.
         Left err -> putStrLn err
         -- | If the JSON was read correctly, begin analysis of dumped blocks & print a list of sequential block lists. 
-        Right ps -> print (createLists (jsonToTupleList ps) 0)
+        Right ps -> print (filterSequencesOnUserInput (read userBlockQuery) (createLists (jsonToTupleList ps) 0))
