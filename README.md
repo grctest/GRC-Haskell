@@ -4,7 +4,7 @@
 
 ## How to use:
 
-Step 1: Install haskell-platform (on linux)
+Step 1: Install 'haskell-platform' and 'jq' (on linux)
 
 Step 2: Clone this repo onto your computer
 
