@@ -8,6 +8,7 @@ import Data.Text
 
 -- | Main function - called from prelude/terminal.
 main = do
+
     -- | User is prompted for a starting point
     foo <- putStrLn "Enter starting block number:"
     startingBlock <- getLine
@@ -34,6 +35,7 @@ main = do
     -- | Let's use JQ to purge the majority of the data fromt eh blocks.json file!
     -- Creating a minimized blocks file, this leaves the original intact.
     shell "jq 'map({height, CPID, GRCAddress})' json/blocks.json > json/blocksmin.json" Turtle.empty
+    --shell "jq 'map({height, CPID, GRCAddress, NeuralHash})' json/blocks.json > json/blocksmin.json" Turtle.empty
 
 createBlockDetails :: [Integer] -> Float -> Float -> IO ExitCode
 createBlockDetails (x:xs) quantityBlocks counter = do
@@ -45,6 +47,7 @@ createBlockDetails (x:xs) quantityBlocks counter = do
             print ((counter/quantityBlocks)*100)
 
             -- | Using Turtle, run the shell command 'gridcoinresearchd getblockbynumber #' and append the output to the blocks.json file.
+            shell ("sudo -u gridcoin gridcoinresearchd -datadir=/home/gridcoin/.GridcoinResearch/ getblockbynumber " ++ show x ++ " > echo >> json/blocks.json")) Turtle.empty
             shell (pack ("gridcoinresearchd getblockbynumber " ++ show x ++ " > echo >> json/blocks.json")) Turtle.empty
             shell "echo ',' >> json/blocks.json" Turtle.empty
             -- | Recursively call this function to query the gridcoin client for the next block. Maintain a static quantityBlocks and increment the counter (for % calc).
@@ -52,6 +55,7 @@ createBlockDetails (x:xs) quantityBlocks counter = do
 
         else do
             -- | Since xs is [] (empty), we have reached the final block.
+            shell ("sudo -u gridcoin gridcoinresearchd -datadir=/home/gridcoin/.GridcoinResearch/ getblockbynumber " ++ show x ++ " > echo >> json/blocks.json")) Turtle.empty
             shell (pack ("gridcoinresearchd getblockbynumber " ++ show x ++ " > echo >> json/blocks.json")) Turtle.empty
             
             -- | Append ] to the end of the created json file!
